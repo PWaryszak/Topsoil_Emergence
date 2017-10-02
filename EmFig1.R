@@ -6,18 +6,9 @@ library(Rmisc)
 data<- read.csv("TopEmergenceGood.csv")#our density data
 str(data)#40924 obs. of  22 variables: = all good.
 
-#Load Trait data to split our species density data into growth forms"
-traitURL <- "https://sites.google.com/site/pawelwaryszak/Pawels-PhD-Thesis/chapter-6/traits.all_19oct15.csv?attredirects=0&d=1"
-Traits <- read.csv(url(traitURL)) # read in data for traits
-dataCut<-data[,1:15] #reducing data size to factors we need for figure.
-data2 <- dplyr::left_join(dataCut,Traits, by = "specCode")#joining perennial/annuals traits with density data
-str(data2)#40929 obs. of  42 variables:
-n<-levels(droplevels(data2$su))#number of su-s = sampling units
-length(n)#853 = n of su = Sampling Unit = Observational Unit
-
 #SUBSET PERENNIALS IN YEAR ONE ONLY + compute densities per su:=========
 #Aggregate data to compute sums per 1 m2 in year one:
-gnative1<-data2[data2$plot2=="control" & data2$TST== 0.5,]#only controls in spring2012=tst05
+gnative1<-data[data$plot2=="control" & data$TST== 0.5,]#only controls in spring2012=tst05
 dim(gnative1)# 11415    36 = that many in site-level treatments (coded "Control")
 gnative2<-gnative1[gnative1$TST== 0.5 & gnative1$nat=="native" ,]#only natives
 dim(gnative2)#6451   36 - that many natives
@@ -25,15 +16,12 @@ dim(gnative2)#6451   36 - that many natives
 n2<-levels(droplevels(gnative2$su))
 length(n2)#433 all good! = number of surveyed plots (observation units)
 
-#time to compute densities per plot = su:
-
+#compute densities per plot = su:
 a1<-aggregate(gnative2$count1m2,
-              
               by = list(su=gnative2$su,site=gnative2$site,plot=gnative2$plot,
-                        
                         Transdepth=gnative2$Transdepth, rip=gnative2$rip,
-                        
-                        fence=gnative2$fence,plot2=gnative2$plot2,longevity=gnative2$longevity), FUN = "sum")
+                        fence=gnative2$fence,plot2=gnative2$plot2,longevity=gnative2$longevity),
+                        FUN = "sum")
 
 dim(a1)# 834 by 9 = CONTAINS sum per plot per 2 longevities (ann & per) in spring 2012
 a1$year<-"one"
@@ -56,6 +44,7 @@ empty.plots #all plots in a1 that do not have match in a1.perennial
 empty.plots$longevity <- "perennial"
 empty.plots$sum1m2 <- 0
 
+#Creating final emergence densities data.frame:
 perennials.year.one<-rbind(a1.perennial,empty.plots)#data.frame':	433 obs. of  10 variables:
 str(perennials.year.one)#433 obs. of  10 variables:
 levels(droplevels((perennials.year.one$longevity)))# double check. YES = "perennial" only
@@ -63,25 +52,16 @@ levels(droplevels((perennials.year.one$longevity)))# double check. YES = "perenn
 #computing 95% CI-s for year ONE==============
 t<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdepth","longevity","year"))
 t
-#Transdepth longevity year   N   sum1m2        sd        se        ci
-#1       deep perennial  one 217 10.062212 7.695721 0.5224196 1.0296929
-#2    shallow perennial  one 216  6.631944 6.117879 0.4162689 0.82049071  
 colnames(t)[1]<-"Site.Treatment"
 t$Filter<- "DISPERSAL"
 
 r<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("rip","longevity","year"))
 r
-#rip longevity year   N    sum1m2        sd        se        ci
-#1   ripped perennial  one 217  4.854839 3.797799 0.2578114 0.5081481
-#2 unripped perennial  one 216 11.863426 7.976884 0.5427582 1.06980851 
 colnames(r)[1]<-"Site.Treatment"
 r$Filter  <- "ABIOTIC"
 
 f<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("fence","longevity","year"))
 f
-#fence longevity year   N    sum1m2        sd        se        ci
-#1 fenced perennial  one 241 8.540456 7.893046 0.5084358 1.0015665
-#2   open perennial  one 192 8.113281 6.114836 0.4413003 0.8704481
 colnames(f)[1]<-"Site.Treatment"
 f$Filter  <- "BIOTIC"
 
