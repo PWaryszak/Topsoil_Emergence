@@ -9,17 +9,6 @@ levels(data$plot2)#"control",heat","herbicide","plastic","pr2", "shade","shade.s
 #change if needed to be length-consistent to: "CTRL" "HEAT" "HERB" "PLAS" "SHAD" "SHSE" "SMOK" "SMPL"
 levels(droplevels(data$dataStart))#"aut13"     "spr12"     "spr12only"
 
-#merging count data with trait data:
-#Load Trait data to split our species density data into growth forms"
-traitURL <- "https://sites.google.com/site/pawelwaryszak/Pawels-PhD-Thesis/chapter-6/traits.all_19oct15.csv?attredirects=0&d=1"
-Traits <- read.csv(url(traitURL)) # read in data for traits
-dataCut<-data[,1:15] #reducing data size to factors we need for figure.
-data2 <- dplyr::left_join(dataCut,Traits, by = "specCode")#joining perennial/annuals traits with density data
-str(data2)#40929 obs. of  42 variables:
-n<-levels(droplevels(data2$su))#number of su-s = sampling units
-length(n)#853 = n of su = Sampling Unit = Observational Unit
-
-#
 #Emergence Densities YEAR ONE:=========
 gsmall<- data[data$dataStart=="spr12" | data$dataStart=="spr12only",]#only records from spring I, dim(g1) = 658476     39
 gsmall1<-gsmall[gsmall$TST== 0.5,]#only in spring2012=tst05
@@ -29,6 +18,7 @@ levels(droplevels(gsmall2$nat))#native
 levels(droplevels(gsmall1$plot2))#"control","herbicide", "plastic" ,"shade","shade.semi"    "smoke"         "smoke.plastic"
 dim(gsmall2)#10333    23
 
+#Compute the total number of su (sampling units) in this year study:
 n1.levels <- an1<-aggregate(gsmall1$count1m2,              
                             by = list(su=gsmall1$su, site=gsmall1$site, 
                                       Transdepth=gsmall1$Transdepth, rip=gsmall1$rip,
@@ -71,23 +61,26 @@ levels(droplevels((perennials.year.one$longevity)))# double check. YES = "perenn
 #compute densities per plot = su:
 ggsmall<- data[data$TST==1.5,]#only records from spring II 
 ggsmall2<-ggsmall[ggsmall$newTST== 1.5 ,]
+
 #We need to remove shade cause not involved in germination:
 ggsmall3<-ggsmall2[!ggsmall2$plot2=="shade" & !ggsmall2$plot2== "shade.semi",]
 dim(ggsmall3)#19530    23
 levels(droplevels(ggsmall3$plot2))#"control", "heat" ,"herbicide","plastic","smoke","smoke.plastic"
 length(levels(droplevels(ggsmall3$su)))# 804
 
+#Run aggregate to get total number of su in year two:
 n2.levels <-aggregate(ggsmall3$count1m2,              
                             by = list(su=ggsmall3$su, site=ggsmall3$site, 
                                       Transdepth=ggsmall3$Transdepth, rip=ggsmall3$rip,
                                       comb2=ggsmall3$comb2, plot2=ggsmall3$plot2), FUN = "sum")
 length(levels(droplevels(n2.levels$su)))#804= total number of su-s (sampling units) in year two
-#number of plots went up as decided after first year survey due to high mortality,
+#number of plots went up in year two compared to year one
+#as we increased nuber of observation units (su) due to high mortality after year one surveys,
 colnames(n2.levels)[7]<-"sum1m2"
 n2.levels$year<-"one"
 head(n2.levels)
 
-ggsmall4<-ggsmall3[ggsmall3$nat=="native",]
+ggsmall4<-ggsmall3[ggsmall3$nat=="native",] #subset native seedlings only (our focus)
 dim(ggsmall4)# 10408    44
 
 #compute densities per plot = su in year one:
