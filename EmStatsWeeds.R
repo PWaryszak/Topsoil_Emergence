@@ -81,7 +81,7 @@ w2$Transdepth<- factor(w2$Transdepth, levels = c("shallow","deep"))
 
 #Fit model:
 fit.w2<-glmer(Weed.Density.1m2~Transdepth*rip+fence+plot2+(1|site/cluster),family = poisson(link="log"), data=w2)
-summary(fit.w2)#
+summary(fit.w2)
 #STATS OUTPUT:
 #######################Estimate Std. Error     df t value Pr(>|t|)    
 (Intercept)               5.19417    0.12676   40.98   <2e-16 ***
