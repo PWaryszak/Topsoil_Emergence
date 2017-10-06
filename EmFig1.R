@@ -65,6 +65,14 @@ f
 colnames(f)[1]<-"Site.Treatment"
 f$Filter  <- "BIOTIC"
 
+combo<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdepth","rip","longevity","year"))
+combo
+######Transdepth  rip longevity year   N    sum1m2       sd        se        ci
+#1       deep   ripped perennial  one 109  5.919725 4.311494 0.4129662 0.8185707
+#2       deep unripped perennial  one 108 14.287037 8.116256 0.7809871 1.5482159
+#3    shallow   ripped perennial  one 108  3.807870 2.889031 0.2779972 0.5510970
+#4    shallow unripped perennial  one 108  9.486111 7.139288 0.6869783 1.3618544
+> combo<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdep
 
 #SUBSET PERENNIALS IN YEAR TWO ONLY + compute densities per su:=========
 data<- read.csv("TopEmergenceGood.csv")
