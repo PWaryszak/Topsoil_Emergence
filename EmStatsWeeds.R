@@ -3,7 +3,7 @@ library(tidyverse)
 library(lme4)
 library(lmerTest)
 
-data<- read.csv("TopEmergenceGood.csv")
+data<- read.csv("TopsoilEmergenceData.csv")
 str(data)#data.frame':	40924 obs. of  23 variables:
 
 #Stats on WEEDS Spring 2012 (all treatments):=====
@@ -54,7 +54,7 @@ w1.output$Season <- "Spring 2012"
 library(lme4)
 library(lmerTest)
 library(tidyverse)
-data<- read.csv("TopEmergenceGood.csv")
+data<- read.csv("TopsoilEmergenceData.csv")
 
 #subset the year one emergence data:
 year2data<-data[data$TST== 1.5 & data$nat=="invasive",] #TST = time since transfer
@@ -81,7 +81,7 @@ w2$Transdepth<- factor(w2$Transdepth, levels = c("shallow","deep"))
 
 #Fit model:
 fit.w2<-glmer(Weed.Density.1m2~Transdepth*rip+fence+plot2+(1|site/cluster),family = poisson(link="log"), data=w2)
-summary(fit.w2)#
+summary(fit.w2)
 #STATS OUTPUT:
 #######################Estimate Std. Error     df t value Pr(>|t|)    
 (Intercept)               5.19417    0.12676   40.98   <2e-16 ***
