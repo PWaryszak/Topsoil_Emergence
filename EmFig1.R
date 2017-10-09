@@ -3,7 +3,7 @@
 library(tidyverse)
 library(Rmisc)
 #Re-Load  data to be sure all works well [Topsoil Emergence DATA:only spr12 & spr13 seasons included:
-data<- read.csv("TopEmergenceGood.csv")#our density data
+data<- read.csv("TopsoilEmergenceData.csv")#our density data
 str(data)#40924 obs. of  22 variables: = all good.
 
 #SUBSET PERENNIALS IN YEAR ONE ONLY + compute densities per su:=========
@@ -51,19 +51,28 @@ levels(droplevels((perennials.year.one$longevity)))# double check. YES = "perenn
 
 #computing 95% CI-s for year ONE==============
 t<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdepth","longevity","year"))
-t
 colnames(t)[1]<-"Site.Treatment"
 t$Filter<- "DISPERSAL"
+t
+##Site.Treatment longevity year   N    sum1m2       sd        se        ci    Filter
+#1           deep perennial  one 217 10.084101 7.714270 0.5236788 1.0321748 DISPERSAL
+#2        shallow perennial  one 216  6.646991 6.133361 0.4173224 0.8225671 DISPERSAL
 
 r<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("rip","longevity","year"))
-r
 colnames(r)[1]<-"Site.Treatment"
 r$Filter  <- "ABIOTIC"
+r
+##Site.Treatment longevity year   N    sum1m2       sd        se        ci  Filter
+#1         ripped perennial  one 217  4.868664 3.814344 0.2589346 0.5103619 ABIOTIC
+#2       unripped perennial  one 216 11.886574 7.996175 0.5440708 1.0723957 ABIOTIC
 
 f<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("fence","longevity","year"))
-f
 colnames(f)[1]<-"Site.Treatment"
 f$Filter  <- "BIOTIC"
+f
+##Site.Treatment longevity year   N   sum1m2       sd        se        ci Filter
+#1         fenced perennial  one 241 8.564315 7.915374 0.5098740 1.0043996 BIOTIC
+#2           open perennial  one 192 8.125000 6.124152 0.4419726 0.8717741 BIOTIC
 
 combo<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdepth","rip","longevity","year"))
 combo
@@ -72,10 +81,9 @@ combo
 #2       deep unripped perennial  one 108 14.287037 8.116256 0.7809871 1.5482159
 #3    shallow   ripped perennial  one 108  3.807870 2.889031 0.2779972 0.5510970
 #4    shallow unripped perennial  one 108  9.486111 7.139288 0.6869783 1.3618544
-> combo<-summarySE(perennials.year.one, measurevar="sum1m2", groupvars=c("Transdep
 
 #SUBSET PERENNIALS IN YEAR TWO ONLY + compute densities per su:=========
-data<- read.csv("TopEmergenceGood.csv")
+data<- read.csv("TopsoilEmergenceData.csv")
 names(data)
 
 ggnative<- data[data$TST==1.5 & data$plot2=="control",]#only records from spring II 
