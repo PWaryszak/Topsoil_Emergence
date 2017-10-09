@@ -8,8 +8,7 @@ library(lme4)
 library(lmerTest)
 library(broom)#Re-Load  data to be sure all works well [Topsoil Emergence DATA:only spr12 & spr13 seasons included:
 data<- read.csv("TopsoilEmergenceData.csv")#our density data
-str(data)#40924 obs. of  22 variables: = all good.
-
+str(data)#38247 obs. of  24 variables:
 
 #STATS Emergence Densities YEAR_ONE_ALL_TREATMETNS=========
 gsmall<- data[data$dataStart=="spr12" | data$dataStart=="spr12only",]#only records from spring I, dim(g1) = 658476     39
@@ -121,7 +120,7 @@ glmer.per.output
 #STATS on YEAR TWO (Spring 2013) emergence: Native PERENNIALS, ALL TREATMENTS=====
 #Re-Load data:
 data<- read.csv("TopsoilEmergenceData.csv")
-str(data)#40924 obs. of  23 variables:
+str(data)
 #compute densities per plot = su:
 ggsmall<- data[data$TST==1.5,]#only records from spring II 
 ggsmall2<-ggsmall[ggsmall$newTST== 1.5 ,]
@@ -174,7 +173,6 @@ perennials.year.two<-rbind(n2.perennials,empty.plots2)#
 str(perennials.year.two)#804 obs. of  10 variables:
 levels(droplevels((perennials.year.two$longevity)))# double check. YES = "perennial" only
 perennials.year.two$rip <- factor( perennials.year.two$rip, levels = c("unripped","ripped"))#changing levels to show Coef-s in relation to ripped effect
-
 
 #STATS Spring 2013 all interactions========
 
