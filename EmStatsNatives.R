@@ -1,4 +1,4 @@
-#STATS on Emergence Data ("TopEmergenceGood.csv")
+#STATS on Emergence Data ("TopsoilEmergenceData.csv")
 #FIGURE 1- effect of site-scale treatments on perennial plant emergence densities
 #LOAD R-PACKAGES & DATA ================
 #install.packages("lme4", "tidyverse", "Rmisc", "lmerTest", "broom") #run this first if no packages present on your R.
@@ -7,7 +7,7 @@ library(Rmisc)
 library(lme4)
 library(lmerTest)
 library(broom)#Re-Load  data to be sure all works well [Topsoil Emergence DATA:only spr12 & spr13 seasons included:
-data<- read.csv("TopEmergenceGood.csv")#our density data
+data<- read.csv("TopsoilEmergenceData.csv")#our density data
 str(data)#40924 obs. of  22 variables: = all good.
 
 
@@ -120,7 +120,7 @@ glmer.per.output
 
 #STATS on YEAR TWO (Spring 2013) emergence: Native PERENNIALS, ALL TREATMENTS=====
 #Re-Load data:
-data<- read.csv("TopEmergenceGood.csv")
+data<- read.csv("TopsoilEmergenceData.csv")
 str(data)#40924 obs. of  23 variables:
 #compute densities per plot = su:
 ggsmall<- data[data$TST==1.5,]#only records from spring II 
