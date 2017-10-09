@@ -3,7 +3,7 @@
 library(tidyverse)
 library(Rmisc)
 #Re-Load data:
-data<- read.csv("TopEmergenceGood.csv")
+data<- read.csv("TopsoilEmergenceData.csv")
 str(data)#40924 obs. of  23 variables:
 levels(data$plot2)#"control",heat","herbicide","plastic","pr2", "shade","shade.semi"    "smoke"         "smoke.plastic"
 #change if needed to be length-consistent to: "CTRL" "HEAT" "HERB" "PLAS" "SHAD" "SHSE" "SMOK" "SMPL"
