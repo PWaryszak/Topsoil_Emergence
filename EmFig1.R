@@ -9,9 +9,9 @@ str(data)#40924 obs. of  22 variables: = all good.
 #SUBSET PERENNIALS IN YEAR ONE ONLY + compute densities per su:=========
 #Aggregate data to compute sums per 1 m2 in year one:
 gnative1<-data[data$plot2=="control" & data$TST== 0.5,]#only controls in spring2012=tst05
-dim(gnative1)# 11415    36 = that many in site-level treatments (coded "Control")
+dim(gnative1)#  11406    24 = that many in site-level treatments (coded "Control")
 gnative2<-gnative1[gnative1$TST== 0.5 & gnative1$nat=="native" ,]#only natives
-dim(gnative2)#6451   36 - that many natives
+dim(gnative2)#6411   24 - that many natives
 
 n2<-levels(droplevels(gnative2$su))
 length(n2)#433 all good! = number of surveyed plots (observation units)
