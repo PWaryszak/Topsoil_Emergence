@@ -145,9 +145,15 @@ pm2
 #ggsave(filename="DivCorr1.jpeg", dpi=600) 
 
 #Total Species Richness=======
+#Native only:
 sp<- data[data$nat == "native",]
 levels(droplevels(sp$specCode))
 length(levels(droplevels(sp$specCode))) #165 species!
+
+#All plant species, including weeds ("invasive"):
+levels(droplevels(data$specCode))
+length(levels(droplevels(data$specCode))) #247 species!
+
 
 #SUBSET PERENNIALS IN YEAR ONE ONLY + compute densities per su:=========
 #Aggregate data to compute sums per 1 m2 in year one:
