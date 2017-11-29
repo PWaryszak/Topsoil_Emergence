@@ -80,8 +80,8 @@ head(i2)
 
 
 #Keep the relevant plot-scale treatments.
-w2<-filter(i2, plot2 == "smoke"|plot2 == "herbicide"|plot2 == "control"|plot2 == "plastic")
-dim(w2)#726   9
+w2<-filter(i2, plot2 == "smoke"|plot2 == "herbicide"|plot2 == "control"|plot2 == "plastic"|plot2 == "heat")
+dim(w2)#750   9
 
 w2$rip<- factor(w2$rip, levels = c( "unripped","ripped"))
 w2$Transdepth<- factor(w2$Transdepth, levels = c("shallow","deep"))
@@ -91,14 +91,15 @@ fit.w2<-glmer(sum1m2~Transdepth*rip+fence+plot2+(1|site/cluster),family = poisso
 summary(fit.w2)
 #STATS OUTPUT:
 #######################Estimate Std. Error     df t value Pr(>|t|)    
-(Intercept)               5.19417    0.12676   40.98   <2e-16 ***
-Transdepthdeep            0.19532    0.12952    1.51   0.1315    
-ripripped                -0.23868    0.12958   -1.84   0.0655 .  
-fenceopen                -0.12796    0.09736   -1.31   0.1887    
-plot2herbicide           -0.03307    0.01728   -1.91   0.0556 .  
-plot2plastic             -0.02512    0.01725   -1.46   0.1453    
-plot2smoke               -0.22780    0.01795  -12.69   <2e-16 ***
-Transdepthdeep:ripripped -0.22422    0.18326   -1.22   0.2212  
+(Intercept)               5.14990    0.12126   42.47  < 2e-16 ***
+Transdepthdeep            0.16319    0.12890    1.27 0.205498    
+ripripped                -0.22277    0.12896   -1.73 0.084092 .  
+fenceopen                -0.10439    0.09688   -1.08 0.281259    
+plot2heat                -1.01519    0.02774  -36.60  < 2e-16 ***
+plot2herbicide           -0.03985    0.01737   -2.29 0.021758 *  
+plot2plastic             -0.06002    0.01744   -3.44 0.000577 ***
+plot2smoke               -0.26323    0.01820  -14.46  < 2e-16 ***
+Transdepthdeep:ripripped -0.20192    0.18238   -1.11 0.268238
 
 library(broom)#getting table broom-way into manuscript:
 w2.output<-tidy(fit.w2, effects ="fixed")# WE need to round them:
@@ -106,4 +107,4 @@ w2.output$Season <- "Spring 2013"
 
 #Write Table:
 w1w2 <- rbind (w1.output, w2.output)
-#write.table(w1w2,row.names = FALSE, file="StatsOutput_Weeds_All.csv",sep=",")
+#write.table(w1w2,row.names = FALSE, file="StatsOutput_Weeds.csv",sep=",")

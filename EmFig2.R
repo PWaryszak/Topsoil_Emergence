@@ -142,7 +142,7 @@ fig2data3
 fig2data3$Filter<- factor(fig2data3$Filter, levels = c("CONTROL", "ABIOTIC", "BIOTIC", "DISPERSAL"))
 fig2data3$plot2<- factor(fig2data3$plot2)
 fig2data3
-#comb2         plot2 longevity year  N    sum1m2        sd        se       ci Scale       year2    Filter
+############comb2         plot2 longevity year  N    sum1m2        sd        se       ci Scale       year2    Filter
 #3  deep.unripped       control perennial  one 60 15.583333  9.448306 1.2197710 2.440756  Site Spring 2012   CONTROL
 #4  deep.unripped       control perennial  two 76  7.273026  6.196394 0.7107751 1.415937  Site Spring 2013   CONTROL
 #6  deep.unripped          heat perennial  two 20 11.762500  8.603654 1.9238355 4.026634  Site Spring 2013 DISPERSAL
