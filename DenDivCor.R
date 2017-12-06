@@ -162,6 +162,17 @@ sp13<- data[data$nat == "native" & data$EmergenceSeason == "Spring2013" ,]
 levels(droplevels(sp13$specCode))
 length(levels(droplevels(sp13$specCode))) # 121 species!
 
+#n of Natives in Spring 2012 mergence event
+sp12<- data[data$nat == "native" & data$EmergenceSeason == "Spring2012" ,]
+levels(droplevels(sp12$specCode))
+length(levels(droplevels(sp12$specCode))) #150 species!
+
+#n of Natives in Spring 2013 mergence event
+
+sp13<- data[data$nat == "native" & data$EmergenceSeason == "Spring2013" ,]
+levels(droplevels(sp13$specCode))
+length(levels(droplevels(sp13$specCode))) #121 species!
+
 #All plant species, including weeds ("invasive"):
 levels(droplevels(data$specCode))
 length(levels(droplevels(data$specCode))) # 247 species!
