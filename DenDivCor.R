@@ -122,27 +122,27 @@ pairs(veg.wide05[,c("DIVshannon", "Density","DIVsimpson")],
 #Cor Plot in Spring 2013 Season:====
 
 pairs(veg.wide1.5[,c("DIVshannon", "Density","DIVsimpson")],
-      lower.panel = panel.cor,)
-
+      lower.panel = panel.cor,
+      main="Spring 2012 Correlations. Diversity & Density of Native Perennials:")
+png(filename = "NatPErSpring2012.jpg", width = 600, height = 400)
 #COOLer way to plot correlations:========
-install.packages("GGally")
+#install.packages("GGally")
 library(GGally)
 #All Sites:
 pm <- ggpairs(veg.wide05[,c("DIVshannon","DIVsimpson", "Density")],
-              upper=list(params=list(size=12)),
-              lower=list(combo="points", params=c(colour="blue")),
-              title= "Correlations between the Diversity indices & Densities")
-pm
+              upper = list(continuous = wrap(ggally_points, size = 2, color = "red")),
+              lower=list(continuous = wrap(ggally_points, size = 2, color = "blue")),
+              title= "Spring 2012 Correlations. Diversity & Density of Native Perennials")
 
 cool_theme<-  theme(legend.position = "none", 
-                    plot.title = element_text(lineheight=1.2, face="bold",size=36),
+                    plot.title = element_text(face="bold",size=14, hjust=0.5),
                     panel.grid.major = element_blank(), 
                     axis.ticks = element_blank(), 
                     panel.border = element_rect(linetype = "dashed", colour = "black", fill = NA))
 
 pm2<- pm + cool_theme 
 pm2 
-#ggsave(filename="DivCorr1.jpeg", dpi=600) 
+#ggsave(filename="DivCorrNatPerennialSpring2012.jpeg", dpi=600) 
 
 #Total Species Richness=======
 #Natives only:
@@ -161,6 +161,17 @@ length(levels(droplevels(sp12$specCode))) # 150 species!
 sp13<- data[data$nat == "native" & data$EmergenceSeason == "Spring2013" ,]
 levels(droplevels(sp13$specCode))
 length(levels(droplevels(sp13$specCode))) # 121 species!
+
+#n of Natives in Spring 2012 mergence event
+sp12<- data[data$nat == "native" & data$EmergenceSeason == "Spring2012" ,]
+levels(droplevels(sp12$specCode))
+length(levels(droplevels(sp12$specCode))) #150 species!
+
+#n of Natives in Spring 2013 mergence event
+
+sp13<- data[data$nat == "native" & data$EmergenceSeason == "Spring2013" ,]
+levels(droplevels(sp13$specCode))
+length(levels(droplevels(sp13$specCode))) #121 species!
 
 #All plant species, including weeds ("invasive"):
 levels(droplevels(data$specCode))

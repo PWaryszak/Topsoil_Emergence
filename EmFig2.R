@@ -4,32 +4,32 @@ library(tidyverse)
 library(Rmisc)
 #Re-Load data:
 data<- read.csv("TopsoilEmergenceData.csv")
-str(data)#40924 obs. of  23 variables:
-levels(data$plot2)#"control",heat","herbicide","plastic","pr2", "shade","shade.semi"    "smoke"         "smoke.plastic"
+str(data)#38247 obs. of  24 variables:
+levels(data$plot2)#"control",heat","herbicide","plastic","pr2", "shade","shade.semi"    "smoke" "smoke.plastic"
 #change if needed to be length-consistent to: "CTRL" "HEAT" "HERB" "PLAS" "SHAD" "SHSE" "SMOK" "SMPL"
 levels(droplevels(data$dataStart))#"aut13"     "spr12"     "spr12only"
 
 #Emergence Densities YEAR ONE:=========
-gsmall<- data[data$dataStart=="spr12" | data$dataStart=="spr12only",]#only records from spring I, dim(g1) = 658476     39
-gsmall1<-gsmall[gsmall$TST== 0.5,]#only in spring2012=tst05
-gsmall2<-gsmall1[gsmall1$TST== 0.5 & gsmall1$nat=="native" ,]#only natives
+Spring2012_Data<- data[data$dataStart=="spr12" | data$dataStart=="spr12only",]#only records from spring I, dim(g1) = 658476     39
+Spring2012_Data1<-Spring2012_Data[Spring2012_Data$TST== 0.5,]#only in spring2012=tst05
+Spring2012_Data2<-Spring2012_Data1[Spring2012_Data1$TST== 0.5 & Spring2012_Data1$nat=="native" ,]#only natives
 
-levels(droplevels(gsmall2$nat))#native 
-levels(droplevels(gsmall1$plot2))#"control","herbicide", "plastic" ,"shade","shade.semi"    "smoke"         "smoke.plastic"
-dim(gsmall2)#10333    23
+levels(droplevels(Spring2012_Data2$nat))#native 
+levels(droplevels(Spring2012_Data1$plot2))#"control","herbicide", "plastic" ,"shade","shade.semi"    "smoke"         "smoke.plastic"
+dim(Spring2012_Data2)#10277    24
 
 #Compute the total number of su (sampling units) in this year study:
-n1.levels <- an1<-aggregate(gsmall1$count1m2,              
-                            by = list(su=gsmall1$su, site=gsmall1$site, 
-                                      Transdepth=gsmall1$Transdepth, rip=gsmall1$rip,
-                                      comb2=gsmall1$comb2, plot2=gsmall1$plot2), FUN = "sum")
+n1.levels <- an1<-aggregate(Spring2012_Data1$count1m2,              
+                            by = list(su=Spring2012_Data1$su, site=Spring2012_Data1$site, 
+                                      Transdepth=Spring2012_Data1$Transdepth, rip=Spring2012_Data1$rip,
+                                      comb2=Spring2012_Data1$comb2, plot2=Spring2012_Data1$plot2), FUN = "sum")
 length(levels(droplevels(n1.levels$su)))#673 = total number of su-s (sampling units)
 colnames(n1.levels)[7]<-"sum1m2"
 n1.levels$year<-"one"
 head(n1.levels)
 
 #compute densities per plot = su in year one:
-n.fenced<-gsmall2[gsmall2$fence=="fenced",]#subsetting only the fenced values as plot-treatments were applied
+n.fenced<-Spring2012_Data2[Spring2012_Data2$fence=="fenced",]#subsetting only the fenced values as plot-treatments were applied
 str(n.fenced)#7511 obs. of  23 variables:
 
 n1<-aggregate(n.fenced$count1m2,              
@@ -41,51 +41,27 @@ str(n1)#938 obs. of  8 variables:
 colnames(n1)[8]<-"sum1m2"
 n1$year<-"one"
 head(n1)
-
 n1.perennials <- n1 [ n1$longevity=="perennial",c( "su", "site","Transdepth","rip","comb2","plot2","sum1m2","year","longevity")]
 str(n1.perennials)#476 obs. of  9 variables:
-
-empty.plots <-  dplyr::anti_join(n1.levels, n1.perennials, by = "su")
-empty.plots #all plots in a1 that do not have match in a1.perennial
-empty.plots$longevity <- "perennial"
-empty.plots$sum1m2 <- 0
-
-perennials.year.one<-rbind(n1.perennials,empty.plots)#
-str(perennials.year.one)#673 obs. of  9 variables:
-levels(droplevels((perennials.year.one$longevity)))# double check. YES = "perennial" only
-
-
 
 
 #Emergence Densities YEAR TWO=======
 #compute densities per plot = su:
-ggsmall<- data[data$TST==1.5,]#only records from spring II 
-ggsmall2<-ggsmall[ggsmall$newTST== 1.5 ,]
+Spring2013_Data<- data[data$TST==1.5,]#only records from spring II 
+Spring2013_Data2<-Spring2013_Data[Spring2013_Data$newTST== 1.5 ,]
 
 #We need to remove shade cause not involved in germination:
-ggsmall3<-ggsmall2[!ggsmall2$plot2=="shade" & !ggsmall2$plot2== "shade.semi",]
-dim(ggsmall3)#19530    23
-levels(droplevels(ggsmall3$plot2))#"control", "heat" ,"herbicide","plastic","smoke","smoke.plastic"
-length(levels(droplevels(ggsmall3$su)))# 804
+Spring2013_Data3 <- Spring2013_Data2[!Spring2013_Data2$plot2=="shade" & !Spring2013_Data2$plot2== "shade.semi",]
 
-#Run aggregate to get total number of su in year two:
-n2.levels <-aggregate(ggsmall3$count1m2,              
-                            by = list(su=ggsmall3$su, site=ggsmall3$site, 
-                                      Transdepth=ggsmall3$Transdepth, rip=ggsmall3$rip,
-                                      comb2=ggsmall3$comb2, plot2=ggsmall3$plot2), FUN = "sum")
-length(levels(droplevels(n2.levels$su)))#804= total number of su-s (sampling units) in year two
-#number of plots went up in year two compared to year one
-#as we increased nuber of observation units (su) due to high mortality after year one surveys,
-colnames(n2.levels)[7]<-"sum1m2"
-n2.levels$year<-"one"
-head(n2.levels)
+levels(droplevels(Spring2013_Data3$plot2))#"control", "heat" ,"herbicide","plastic","smoke","smoke.plastic"
+length(levels(droplevels(Spring2013_Data3$su)))# 804
 
-ggsmall4<-ggsmall3[ggsmall3$nat=="native",] #subset native seedlings only (our focus)
-dim(ggsmall4)# 10408    44
+Spring2013_Data4<-Spring2013_Data3[Spring2013_Data3$nat=="native",] #subset native seedlings only (our focus)
+dim(Spring2013_Data4)# 10100    24
 
 #compute densities per plot = su in year one:
-n2.fenced<-ggsmall4[ggsmall4$fence=="fenced",]#subsetting only the fenced values as plot-treatments were applied
-str(n2.fenced)#6743 obs. of  23 variables:
+n2.fenced<-Spring2013_Data4[Spring2013_Data4$fence=="fenced",]#subsetting only the fenced values as plot-treatments were applied
+str(n2.fenced)#6507 obs. of  24 variables:
 
 n2<-aggregate(n2.fenced$count1m2,              
               by = list(su=n2.fenced$su, site=n2.fenced$site, 
@@ -95,35 +71,27 @@ n2<-aggregate(n2.fenced$count1m2,
 str(n2)#992 obs. of  8 variables:
 colnames(n2)[8]<-"sum1m2"
 n2$year<-"two"
-head(n2)
+nrow(n2[n2$sum1m2==0,])#1 = that many plots were empty of native perennials in year two:
 
 n2.perennials <- n2 [ n2$longevity=="perennial",c( "su", "site","Transdepth","rip","comb2","plot2","sum1m2","year","longevity")]
 str(n2.perennials)#506 obs. of  9 variables:
 
-empty.plots2 <-  dplyr::anti_join(n2.levels, n2.perennials, by = "su")
-empty.plots2 #all plots in a1 that do not have match in a1.perennial
-empty.plots2$longevity <- "perennial"
-empty.plots2$sum1m2 <- 0
-
-perennials.year.two<-rbind(n2.perennials,empty.plots2)#
-str(perennials.year.two)#804 obs. of  9 variables:
-levels(droplevels((perennials.year.two$longevity)))# double check. YES = "perennial" only
-
 #BIND both years:
-n<-rbind(perennials.year.one,perennials.year.two)#binding two springs together (spr12 & spr13)
-str(n)#1477 obs. of  9 variables:
+n<-rbind(n1.perennials ,n2.perennials )#binding two springs together (spr12 & spr13)
+str(n)#982 obs. of  9 variables:
 
 
 #SummarySE on BOTH YEARS in native:============
 DU <- n [n$comb2=="deep.unripped",] #these are our controls
-str(DU)#384 obs. of  9 variables:
+str(DU)#262 obs. of  9 variables:
 
-fig2<-summarySE(DU, measurevar="sum1m2", groupvars=c("comb2","plot2","longevity","year"))
-fig2
-dim(fig2data)#13  11
+fig2data<-summarySE(DU, measurevar="sum1m2", groupvars=c("comb2","plot2","longevity","year"))
+fig2data
+dim(fig2data)#13 9
+AllDU<-summarySE(DU, measurevar="sum1m2", groupvars=c("comb2","longevity","year"))
+AllDU
 
 #Drawing Figure 2 perennials only, both years, (plot-scale treats)==============
-range(fig2data$sum1m2)# 7.273026 18.093750
 fig2data$Scale <- "Site" #to reduce facetting to one level only on x-axis.
 fig2data$year2 <- ifelse(fig2data$year == "one", "Spring 2012", "Spring 2013") #to make it look better on figure
 #Define filters:
@@ -136,11 +104,12 @@ fig2data2 <- fig2data %>%  mutate(Filter = recode(plot2,
 
 
 
-fig2data3 <- subset (fig2data2, fig2data2$plot2 != "shade")
-fig2data3 <- subset (fig2data3, fig2data3$plot2 != "shade.semi")
+fig2data3 <- subset (fig2data2, fig2data2$plot2 != "shade")#remove shade as designed for survival not emergence
+fig2data3 <- subset (fig2data3, fig2data3$plot2 != "shade.semi")#remove shade.semi (stolen shade)
 fig2data3
 fig2data3$Filter<- factor(fig2data3$Filter, levels = c("CONTROL", "ABIOTIC", "BIOTIC", "DISPERSAL"))
-fig2data3$plot2<- factor(fig2data3$plot2)
+fig2data3$plot2<- factor(fig2data3$plot2, levels = c("control", "herbicide", "heat", 
+                                                     "plastic", "smoke","smoke.plastic"))
 fig2data3
 ############comb2         plot2 longevity year  N    sum1m2        sd        se       ci Scale       year2    Filter
 #3  deep.unripped       control perennial  one 60 15.583333  9.448306 1.2197710 2.440756  Site Spring 2012   CONTROL
@@ -174,3 +143,14 @@ Fig5<- Fig4 +theme(axis.text.y=element_text(size=20),
 Fig5
 Fig6<- Fig5 +  scale_y_continuous("Plant Density (m\u00B2)", limits = c(4,25))
 Fig6
+
+#Testing NEW ARRANGMENTS:
+pd <- position_dodge(.5)
+ggplot(fig2data3, aes(x=plot2, y=sum1m2, shape=Filter, color=year2))+
+ geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.2,position=pd,size=1.4)+
+ geom_point(position=pd,size=6)+ 
+ geom_line(position=pd) +
+ scale_colour_manual(values = c("green", "red")) +
+ scale_shape_manual(values=c(16,15,15,15))+
+ facet_grid(year2~Filter,  scales="free")+theme_bw()
+
