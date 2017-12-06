@@ -52,7 +52,7 @@ veg.wide1.5$Density<-rowSums(veg.wide1.5[,2:96])
 
 summary(cor(veg.wide1.5$DIVshannon,veg.wide1.5$Density))
 cor1.5<-cor.test(veg.wide1.5$DIVshannon,veg.wide1.5$Density)
-cor1.5$estimate # 0.6507165 
+cor1.5$estimate # 0.650716
 cor1.5$p.value # P< 0.001
 cor1.5$statistic # t = 24.74854 
 
@@ -145,10 +145,22 @@ pm2
 #ggsave(filename="DivCorr1.jpeg", dpi=600) 
 
 #Total Species Richness=======
-#Native only:
+#Natives only:
+#All:
 sp<- data[data$nat == "native",]
 levels(droplevels(sp$specCode))
 length(levels(droplevels(sp$specCode))) #165 species!
+
+#n of Natives in Spring 2012 mergence event
+sp12<- data[data$nat == "native" & data$EmergenceSeason == "Spring2012" ,]
+levels(droplevels(sp12$specCode))
+length(levels(droplevels(sp12$specCode))) #150 species!
+
+#n of Natives in Spring 2013 mergence event
+
+sp13<- data[data$nat == "native" & data$EmergenceSeason == "Spring2013" ,]
+levels(droplevels(sp13$specCode))
+length(levels(droplevels(sp13$specCode))) #121 species!
 
 #All plant species, including weeds ("invasive"):
 levels(droplevels(data$specCode))
