@@ -23,7 +23,7 @@ a1<-aggregate(gnative2$count1m2,
                         fence=gnative2$fence,plot2=gnative2$plot2,longevity=gnative2$longevity),
                         FUN = "sum")
 
-dim(a1)# 834 by 9 = CONTAINS sum per plot per 2 longevities (ann & per) in spring 2012
+dim(a1)# 834 by 9, range(a1$sum1m2) =0.25 71.75
 a1$year<-"one"
 colnames(a1)[9]<-"sum1m2"
 
@@ -162,7 +162,6 @@ Fig2<-Fig1 +geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.30,position
 Fig3<-Fig2+ geom_point(position=pd,size=6)
 Fig3a<-Fig3 + geom_line(position=pd) + scale_colour_manual(values = c("green", "red")) +scale_shape_manual(values=c(15,15))
 Fig4<-Fig3a+facet_grid(year2~Filter+Site.Treatment)+theme_bw()
-Fig4
 #Changing the font size:
 Fig5<- Fig4 +theme(axis.text.y=element_text(size=20),
                    axis.text.x=element_blank(),
@@ -171,8 +170,28 @@ Fig5<- Fig4 +theme(axis.text.y=element_text(size=20),
                    panel.grid.minor.x = element_blank(),
                    strip.text=element_text(size=20),
                    legend.position = "none")
-Fig5
 Fig6<- Fig5 +  scale_y_continuous("Plant Density (m\u00B2)", limits = c(4,14))
-Fig6
-
 #ggsave(Fig6, filename="fig1Perennials3.png", width = 140, height = 200, units = "mm") # way to save it to fit journal and A4 format easily
+
+#NEW FIG.1 (23apr2018):====
+
+Fig1 <- 
+  ggplot(EmData, aes(x=Site.Treatment, y=sum1m2, shape=Filter, color=year2))+
+  geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.2,position=pd,size=1.4)+
+  geom_point(position=pd,size=4)+ 
+  geom_line(position=pd) +
+  scale_colour_manual(values = c("green", "red")) +
+  #scale_shape_manual(values=c(16,15,15,15))+
+  facet_grid(year2~Filter,  scales="free", drop = T)+theme_bw()+
+  theme(axis.text.y=element_text(size=17),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(size=24),
+        axis.text.x = element_text(size=17),
+        panel.grid.minor.x = element_blank(),
+        strip.text=element_text(size=20),
+        legend.position = "none") +
+  labs(y=expression(Plant~density~(m^{-2})))+
+  scale_y_continuous(limits = c(4,13))
+
+
+ggsave(Fig1, filename = "Fig1_SiteScale_emergenceNEW.jpg", width = 180, height = 100, units = "mm")

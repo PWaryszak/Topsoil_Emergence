@@ -110,6 +110,8 @@ fig2data3
 fig2data3$Filter<- factor(fig2data3$Filter, levels = c("CONTROL", "ABIOTIC", "BIOTIC", "DISPERSAL"))
 fig2data3$plot2<- factor(fig2data3$plot2, levels = c("control", "herbicide", "heat", 
                                                      "plastic", "smoke","smoke.plastic"))
+
+#Table of Emergence Densiteis in Year I & II=======
 fig2data3
 ############comb2         plot2 longevity year  N    sum1m2        sd        se       ci Scale       year2    Filter
 #3  deep.unripped       control perennial  one 60 15.583333  9.448306 1.2197710 2.440756  Site Spring 2012   CONTROL
@@ -131,7 +133,6 @@ Fig2<-Fig1 +geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.2,position=
 Fig3<-Fig2+ geom_point(position=pd,size=6)
 Fig3a<-Fig3 + geom_line(position=pd) + scale_colour_manual(values = c("green", "red")) +scale_shape_manual(values=c(15,15))
 Fig4<-Fig3a+facet_grid(year2~Filter + plot2)+theme_bw()
-Fig4
 #Changing the font size:
 Fig5<- Fig4 +theme(axis.text.y=element_text(size=20),
                    axis.text.x=element_blank(),
@@ -140,17 +141,32 @@ Fig5<- Fig4 +theme(axis.text.y=element_text(size=20),
                    panel.grid.minor.x = element_blank(),
                    strip.text=element_text(size=20),
                    legend.position = "none")
-Fig5
 Fig6<- Fig5 +  scale_y_continuous("Plant Density (m\u00B2)", limits = c(4,25))
-Fig6
+#Fig6
 
 #Testing NEW ARRANGMENTS:
 pd <- position_dodge(.5)
-ggplot(fig2data3, aes(x=plot2, y=sum1m2, shape=Filter, color=year2))+
+#Remove plastic as agreed. No effect:
+fig2data4 <- fig2data3 [  fig2data3$plot2 !="smoke.plastic" ,]
+fig2data5 <- fig2data4 [  fig2data4$plot2 !="plastic" ,]
+
+Fig2 <- ggplot(fig2data5, aes(x=plot2, y=sum1m2, shape=Filter, color=year2))+
  geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.2,position=pd,size=1.4)+
  geom_point(position=pd,size=6)+ 
  geom_line(position=pd) +
  scale_colour_manual(values = c("green", "red")) +
  scale_shape_manual(values=c(16,15,15,15))+
- facet_grid(year2~Filter,  scales="free")+theme_bw()
+ facet_grid(year2~Filter,  scales="free", drop = T)+theme_bw()+
+  theme(axis.text.y=element_text(size=18),
+         #axis.text.x=element_blank(),
+         axis.title.x=element_blank(),
+         axis.title.y=element_text(size=24),
+         axis.text.x = element_text(size=18),
+         panel.grid.minor.x = element_blank(),
+         strip.text=element_text(size=20),
+         legend.position = "none") +
+  labs(y=expression(Plant~density~(m^{-2})))+
+  scale_y_continuous(limits = c(4,25))
 
+
+ggsave(Fig2, filename = "Fig2_Plot2emergenceNEW.jpg", width = 160, height = 100, units = "mm")
