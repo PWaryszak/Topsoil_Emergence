@@ -16,6 +16,34 @@ str(data)#38247 obs. of  24 variables:
 MyTraits <- select(traits,specCode, Nfix, growCategory,maxHgt,seedStorage)
 DivData <- left_join(data, MyTraits, by = "specCode")
 str(DivData)#38247 obs. of  28 variables:
+
+#double check on richness value with spread function:
+topsoil_sp <- DivData %>% 
+  
+  filter(comb2 == "deep.unripped") %>% #the most succesful site-treatment
+  
+  select(plot2, EmergenceSeason, su, specCode, count1m2) %>%
+  
+  spread(specCode, count1m2, fill = 0)
+
+
+Species <- select( topsoil_sp, acaccycl:xanthueg )
+
+topsoil_sp$Richness <- specnumber(Species)
+table(topsoil_sp$Richness) 
+
+
+topsoil_sp_means <- select(topsoil_sp,su, plot2, EmergenceSeason, Richness)%>%
+  
+  group_by(su, plot2, EmergenceSeason) %>%
+  
+  summarise(RichnessMean = mean(Richness), Richness_SD = sd(Richness))
+
+topsoil_sp_means #the same values!!! as in topsoil_sums !!!
+
+
+
+###
 topsoil_sums <- DivData %>% 
   
   filter(comb2 == "deep.unripped") %>% #the most succesful site-treatment
