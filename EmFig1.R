@@ -175,8 +175,7 @@ Fig6<- Fig5 +  scale_y_continuous("Plant Density (m\u00B2)", limits = c(4,14))
 
 #NEW FIG.1 (23apr2018):====
 
-Fig1 <- 
-  ggplot(EmData, aes(x=Site.Treatment, y=sum1m2, shape=Filter, color=year2))+
+Fig1 <-   ggplot(EmData, aes(x=Site.Treatment, y=sum1m2, shape=Filter, color=year2))+
   geom_errorbar(aes(ymin=sum1m2-ci, ymax=sum1m2+ci),width=.2,position=pd,size=1.4)+
   geom_point(position=pd,size=4)+ 
   geom_line(position=pd) +
@@ -194,4 +193,4 @@ Fig1 <-
   scale_y_continuous(limits = c(4,13))
 
 
-ggsave(Fig1, filename = "Fig1_SiteScale_emergenceNEW.jpg", width = 180, height = 100, units = "mm")
+#ggsave(Fig1, filename = "Fig1_SiteScale_emergenceNEW.jpg", width = 180, height = 100, units = "mm")
