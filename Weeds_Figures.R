@@ -124,7 +124,7 @@ Weed.Fig1 <-  ggplot(all.weeds, aes(x=Site.Treatment, y=Weed.Density.1m2, shape 
   scale_y_continuous(limits = c(55,187))
 
 Weed.Fig1
-ggsave(Weed.Fig1, filename = "Fig_SiteScale_WEEDS3.jpg", width = 180, height = 120, units = "mm")
+#ggsave(Weed.Fig1, filename = "Fig_SiteScale_WEEDS3.jpg", width = 180, height = 120, units = "mm")
 
 #################################################
 
@@ -188,7 +188,7 @@ WeedsFig2 <- ggplot(WeedsFig2data5, aes(x=plot2, y=sum1m2, shape=plot2, color=ye
   geom_point(position=pd,size=6)+ 
   geom_line(position=pd) +
   scale_colour_manual(values = c("black", "red")) +
-  #scale_shape_manual(values=c(16,15,15,15))+
+  scale_shape_manual(values=c(16,22,8,11))+
   facet_grid(.~Filter, scales="free", drop = T)+
   labs(y=expression(Weed~density~(m^{-2})), color = "Emergence Season", shape = "Treatment")+
   theme_bw()+
@@ -205,4 +205,4 @@ WeedsFig2 <- ggplot(WeedsFig2data5, aes(x=plot2, y=sum1m2, shape=plot2, color=ye
 
 
 WeedsFig2
-#ggsave(WeedsFig2, filename = "WeedsFig_Plot2emergenceNEW2.jpg", width = 180, height = 110, units = "mm")
+#ggsave(WeedsFig2, filename = "WeedsFig_Plot2emergenceNEW3.jpg", width = 180, height = 110, units = "mm")
