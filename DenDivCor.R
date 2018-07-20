@@ -22,6 +22,7 @@ dim(veg.wide05)#665 120
 veg.wide05$DIVshannon<-diversity(veg.wide05[,2:120])
 veg.wide05$DIVsimpson<-diversity(veg.wide05[,2:120], index= "simpson")
 veg.wide05$Density<-rowSums(veg.wide05[,2:120])
+veg.wide05$Richness<-specnumber(veg.wide05[,2:120])
 
 summary(cor(veg.wide05$DIVshannon,veg.wide05$Density))
 cor05<-cor.test(veg.wide05$DIVshannon,veg.wide05$Density)
@@ -29,6 +30,283 @@ cor05$estimate # 0.7239812
 cor05$p.value # P< 0.001
 cor05$statistic # t = 27.02393 
 
+#SummarySE for richness of spring2012 emergence:=====
+#assign su with treatments:
+su_treats<-aggregate(data$count1m2,
+              by = list(su=data$su,Transdepth=data$Transdepth, rip=data$rip,
+                        fence=data$fence,plot2=data$plot2),
+              FUN = "sum")
+dim(su_treats)#853   6 = this our su/treatment reference dataset we can use to merge
+
+div1 <- left_join( veg.wide05, su_treats, by = "su")
+dim(div1)#665 129
+div1$season <- "Spring 2012"
+
+#Compute means +95%CI for the ggplot for spring 2012 emergence indices:
+d1<-summarySE(div1, measurevar="Richness", groupvars=c("Transdepth","season"))
+d1$Filter <- "DISPERSAL"
+colnames(d1)[1]<-"Site.Treatment"
+
+d2<-summarySE(div1, measurevar="Richness", groupvars=c("rip","season"))
+d2$Filter <- "ABIOTIC"
+colnames(d2)[1]<-"Site.Treatment"
+
+d3<-summarySE(div1, measurevar="Richness", groupvars=c("fence","season"))
+d3$Filter <- "BIOTIC"
+colnames(d3)[1]<-"Site.Treatment"
+
+#SummarySE for richness of spring2013 emergence:=====
+#Spring 2013 data:
+df1.5 <- data %>% filter(TST==1.5 & nat=="native" & longevity=="perennial")
+str(df1.5)#7289 obs. of  25 variables:
+
+sp.data1.5<- df1.5 %>% select(c("su", "specCode", "count4m2"))#su = sampling unit
+str(sp.data1.5)#7289 obs. of  3 variables:
+
+#Change sp data to wide format to compute:
+veg.wide1.5<-spread(sp.data1.5,key = specCode, value = count4m2, fill = 0)
+dim(veg.wide1.5)#836  96
+
+#Compute Diversity indices:
+veg.wide1.5$DIVshannon<-diversity(veg.wide1.5[,2:96])
+veg.wide1.5$DIVsimpson<-diversity(veg.wide1.5[,2:96], index= "simpson")
+veg.wide1.5$Density<-rowSums(veg.wide1.5[,2:96])
+veg.wide1.5$Richness<-specnumber(veg.wide1.5[,2:96])
+
+summary(cor(veg.wide1.5$DIVshannon,veg.wide1.5$Density))
+cor1.5<-cor.test(veg.wide1.5$DIVshannon,veg.wide1.5$Density)
+cor1.5$estimate # 0.650716
+cor1.5$p.value # P< 0.001
+cor1.5$statistic # t = 24.74854 
+
+#assign su with treatments:
+div2 <- left_join( veg.wide1.5, su_treats, by = "su")
+dim(div2)#836 rows of  96 (104 cols) native perennials speices
+div2$season <- "Spring 2013"
+
+#Compute means +95%CI for the ggplot for spring 2013 emergence indices:
+d4<-summarySE(div2, measurevar="Richness", groupvars=c("Transdepth","season"))
+d4$Filter <- "DISPERSAL"
+colnames(d4)[1]<-"Site.Treatment"
+
+d5<-summarySE(div2, measurevar="Richness", groupvars=c("rip","season"))
+d5$Filter <- "ABIOTIC"
+colnames(d5)[1]<-"Site.Treatment"
+
+d6<-summarySE(div2, measurevar="Richness", groupvars=c("fence","season"))
+d6$Filter <- "BIOTIC"
+colnames(d6)[1]<-"Site.Treatment"
+
+EmData<-rbind(d1,d2,d3,d4,d5,d6)#merging year two and one
+EmData
+EmData$Scale <- "Site" #to reduce facetting to one level only on x-axis.
+
+#SummarySE ggplot for all years emergence:=====
+pd <- position_dodge(.5)
+Fig_Richness <- 
+  ggplot(EmData, aes(x=Site.Treatment, y=Richness,shape=Filter, color=season)) +
+  geom_errorbar(aes(ymin=Richness-ci, ymax=Richness+ci),width=.30,position=pd,size=1.4)+
+  geom_point(position=pd,size=3)+ 
+  #geom_line(position=pd) +
+  scale_colour_manual(values = c("green", "red")) +
+  facet_grid(season~Filter,  scales="free", drop = T)+theme_bw()+
+  scale_y_continuous("Richness of native perennial plants", limits = c(4,16))+
+  theme(axis.text.y=element_text(size=18),
+                   axis.text.x=element_text(size=18),
+                   axis.title.x=element_blank(),
+                   axis.title.y=element_text(size=18),
+                   panel.grid.minor.x = element_blank(),
+                   strip.text=element_text(size=18),
+                   legend.position = "none")
+
+#ggsave(Fig_Richness, filename = "Fig1_SiteScale_emergenceRichness.jpg", width = 180, height = 120, units = "mm")
+
+
+
+
+
+#SummarySE for richness of spring2012 emergence:=====
+#assign su with treatments:
+su_treats<-aggregate(data$count1m2,
+                     by = list(su=data$su,Transdepth=data$Transdepth, rip=data$rip,
+                               fence=data$fence,plot2=data$plot2),
+                     FUN = "sum")
+dim(su_treats)#853   6 = this our su/treatment reference dataset we can use to merge
+
+div1 <- left_join( veg.wide05, su_treats, by = "su")
+dim(div1)#665 129
+div1$season <- "Spring 2012"
+
+#Compute means +95%CI for the ggplot for spring 2012 emergence indices:
+d1<-summarySE(div1, measurevar="Richness", groupvars=c("Transdepth","season"))
+d1$Filter <- "DISPERSAL"
+colnames(d1)[1]<-"Site.Treatment"
+
+d2<-summarySE(div1, measurevar="Richness", groupvars=c("rip","season"))
+d2$Filter <- "ABIOTIC"
+colnames(d2)[1]<-"Site.Treatment"
+
+d3<-summarySE(div1, measurevar="Richness", groupvars=c("fence","season"))
+d3$Filter <- "BIOTIC"
+colnames(d3)[1]<-"Site.Treatment"
+
+#SummarySE for richness of spring2013 emergence:=====
+#Spring 2013 data:
+df1.5 <- data %>% filter(TST==1.5 & nat=="native" & longevity=="perennial")
+str(df1.5)#7289 obs. of  25 variables:
+
+sp.data1.5<- df1.5 %>% select(c("su", "specCode", "count4m2"))#su = sampling unit
+str(sp.data1.5)#7289 obs. of  3 variables:
+
+#Change sp data to wide format to compute:
+veg.wide1.5<-spread(sp.data1.5,key = specCode, value = count4m2, fill = 0)
+dim(veg.wide1.5)#836  96
+
+#Compute Diversity indices:
+veg.wide1.5$DIVshannon<-diversity(veg.wide1.5[,2:96])
+veg.wide1.5$DIVsimpson<-diversity(veg.wide1.5[,2:96], index= "simpson")
+veg.wide1.5$Density<-rowSums(veg.wide1.5[,2:96])
+veg.wide1.5$Richness<-specnumber(veg.wide1.5[,2:96])
+
+summary(cor(veg.wide1.5$DIVshannon,veg.wide1.5$Density))
+cor1.5<-cor.test(veg.wide1.5$DIVshannon,veg.wide1.5$Density)
+cor1.5$estimate # 0.650716
+cor1.5$p.value # P< 0.001
+cor1.5$statistic # t = 24.74854 
+
+#assign su with treatments:
+div2 <- left_join( veg.wide1.5, su_treats, by = "su")
+dim(div2)#836 rows of  96 (104 cols) native perennials speices
+div2$season <- "Spring 2013"
+
+#Compute means +95%CI for the ggplot for spring 2013 emergence indices:
+d4<-summarySE(div2, measurevar="Richness", groupvars=c("Transdepth","season"))
+d4$Filter <- "DISPERSAL"
+colnames(d4)[1]<-"Site.Treatment"
+
+d5<-summarySE(div2, measurevar="Richness", groupvars=c("rip","season"))
+d5$Filter <- "ABIOTIC"
+colnames(d5)[1]<-"Site.Treatment"
+
+d6<-summarySE(div2, measurevar="Richness", groupvars=c("fence","season"))
+d6$Filter <- "BIOTIC"
+colnames(d6)[1]<-"Site.Treatment"
+
+EmData<-rbind(d1,d2,d3,d4,d5,d6)#merging year two and one
+EmData
+EmData$Scale <- "Site" #to reduce facetting to one level only on x-axis.
+
+#SummarySE ggplot for all years emergence:=====
+pd <- position_dodge(.5)
+Fig_Richness <- 
+  ggplot(EmData, aes(x=Site.Treatment, y=Richness,shape=Filter, color=season)) +
+  geom_errorbar(aes(ymin=Richness-ci, ymax=Richness+ci),width=.30,position=pd,size=1.4)+
+  geom_point(position=pd,size=3)+ 
+  #geom_line(position=pd) +
+  scale_colour_manual(values = c("green", "red")) +
+  facet_grid(season~Filter,  scales="free", drop = T)+theme_bw()+
+  scale_y_continuous("Richness of native perennial plants", limits = c(4,16))+
+  theme(axis.text.y=element_text(size=18),
+        axis.text.x=element_text(size=18),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(size=18),
+        panel.grid.minor.x = element_blank(),
+        strip.text=element_text(size=18),
+        legend.position = "none")
+
+#ggsave(Fig_Richness, filename = "Fig1_SiteScale_emergenceRichness.jpg", width = 180, height = 120, units = "mm")
+
+
+#SummarySE for Shannon-Wienner indices of spring2012 emergence:=====
+#assign su with treatments:
+su_treats<-aggregate(data$count1m2,
+                     by = list(su=data$su,Transdepth=data$Transdepth, rip=data$rip,
+                               fence=data$fence,plot2=data$plot2),
+                     FUN = "sum")
+dim(su_treats)#853   6 = this our su/treatment reference dataset we can use to merge
+
+div1 <- left_join( veg.wide05, su_treats, by = "su")
+dim(div1)#665 129
+div1$season <- "Spring 2012"
+
+#Compute means +95%CI for the ggplot for spring 2012 emergence indices:
+d1<-summarySE(div1, measurevar="DIVshannon", groupvars=c("Transdepth","season"))
+d1$Filter <- "DISPERSAL"
+colnames(d1)[1]<-"Site.Treatment"
+
+d2<-summarySE(div1, measurevar="DIVshannon", groupvars=c("rip","season"))
+d2$Filter <- "ABIOTIC"
+colnames(d2)[1]<-"Site.Treatment"
+
+d3<-summarySE(div1, measurevar="DIVshannon", groupvars=c("fence","season"))
+d3$Filter <- "BIOTIC"
+colnames(d3)[1]<-"Site.Treatment"
+
+#SummarySE for DIVshannon of spring2013 emergence:=====
+#Spring 2013 data:
+df1.5 <- data %>% filter(TST==1.5 & nat=="native" & longevity=="perennial")
+str(df1.5)#7289 obs. of  25 variables:
+
+sp.data1.5<- df1.5 %>% select(c("su", "specCode", "count4m2"))#su = sampling unit
+str(sp.data1.5)#7289 obs. of  3 variables:
+
+#Change sp data to wide format to compute:
+veg.wide1.5<-spread(sp.data1.5,key = specCode, value = count4m2, fill = 0)
+dim(veg.wide1.5)#836  96
+
+#Compute Diversity indices:
+veg.wide1.5$DIVshannon<-diversity(veg.wide1.5[,2:96])
+veg.wide1.5$DIVsimpson<-diversity(veg.wide1.5[,2:96], index= "simpson")
+veg.wide1.5$Density<-rowSums(veg.wide1.5[,2:96])
+veg.wide1.5$Richness<-specnumber(veg.wide1.5[,2:96])
+
+summary(cor(veg.wide1.5$DIVshannon,veg.wide1.5$Density))
+cor1.5<-cor.test(veg.wide1.5$DIVshannon,veg.wide1.5$Density)
+cor1.5$estimate # 0.650716
+cor1.5$p.value # P< 0.001
+cor1.5$statistic # t = 24.74854 
+
+#assign su with treatments:
+div2 <- left_join( veg.wide1.5, su_treats, by = "su")
+dim(div2)#836 rows of  96 (104 cols) native perennials speices
+div2$season <- "Spring 2013"
+
+#Compute means +95%CI for the ggplot for spring 2013 emergence indices:
+d4<-summarySE(div2, measurevar="DIVshannon", groupvars=c("Transdepth","season"))
+d4$Filter <- "DISPERSAL"
+colnames(d4)[1]<-"Site.Treatment"
+
+d5<-summarySE(div2, measurevar="DIVshannon", groupvars=c("rip","season"))
+d5$Filter <- "ABIOTIC"
+colnames(d5)[1]<-"Site.Treatment"
+
+d6<-summarySE(div2, measurevar="DIVshannon", groupvars=c("fence","season"))
+d6$Filter <- "BIOTIC"
+colnames(d6)[1]<-"Site.Treatment"
+
+EmData<-rbind(d1,d2,d3,d4,d5,d6)#merging year two and one
+EmData
+EmData$Scale <- "Site" #to reduce facetting to one level only on x-axis.
+
+#SummarySE ggplot for all years emergence:=====
+pd <- position_dodge(.5)
+Fig_DIVshannon <- 
+  ggplot(EmData, aes(x=Site.Treatment, y=DIVshannon,shape=Filter, color=season)) +
+  geom_errorbar(aes(ymin=DIVshannon-ci, ymax=DIVshannon+ci),width=.30,position=pd,size=1.4)+
+  geom_point(position=pd,size=3)+ 
+  #geom_line(position=pd) +
+  scale_colour_manual(values = c("green", "red")) +
+  facet_grid(season~Filter,  scales="free", drop = T)+theme_bw()+
+  scale_y_continuous("Diversity of native perennial plants", limits = c(1.5,2.25))+
+  theme(axis.text.y=element_text(size=18),
+        axis.text.x=element_text(size=18),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(size=18),
+        panel.grid.minor.x = element_blank(),
+        strip.text=element_text(size=18),
+        legend.position = "none")
+
+#ggsave(Fig_DIVshannon, filename = "Fig1_SiteScale_emergenceDIVshannon.jpg", width = 180, height = 120, units = "mm")
 
 #Pearson's Correalation Test for Spring 2013=========
 #Subset native, perennials species data for TST=1.5 (Spring 2013):
@@ -124,7 +402,8 @@ pairs(veg.wide05[,c("DIVshannon", "Density","DIVsimpson")],
 pairs(veg.wide1.5[,c("DIVshannon", "Density","DIVsimpson")],
       lower.panel = panel.cor,
       main="Spring 2012 Correlations. Diversity & Density of Native Perennials:")
-png(filename = "NatPErSpring2012.jpg", width = 600, height = 400)
+#png(filename = "NatPErSpring2012.jpg", width = 600, height = 400)
+
 #COOLer way to plot correlations:========
 #install.packages("GGally")
 library(GGally)
@@ -146,7 +425,6 @@ pm2
 
 #Total Species Richness=======
 #Natives only:
-#All:
 sp<- data[data$nat == "native",]
 levels(droplevels(sp$specCode))
 length(levels(droplevels(sp$specCode))) # 165 species!
@@ -178,7 +456,7 @@ levels(droplevels(data$specCode))
 length(levels(droplevels(data$specCode))) # 247 species!
 
 
-#SUBSET PERENNIALS IN YEAR ONE ONLY + compute densities per su:=========
+#SUBSET PERENNIALS IN YEAR ONE (Spring 2012) ONLY + compute densities per su:=========
 #Aggregate data to compute sums per 1 m2 in year one:
 gnative1<-data[data$plot2=="control" & data$TST== 0.5,]#only controls in spring2012=tst05
 dim(gnative1)# 11406    24= that many in site-level treatments (coded "Control")
