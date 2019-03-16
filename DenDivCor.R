@@ -6,18 +6,16 @@ library(Rmisc)
 data<- read.csv("TopsoilEmergenceData.csv")#our density data
 str(data)#38247 obs. of  25 variables:
 
+
 #Pearson's Correalation Test for Spring 2012=========
 #Subset native, perennials species data for TST=0.5 (Spring 2012):
-df05 <- data %>% filter(TST==0.5 & nat=="native" & longevity=="perennial" )
-str(df05)#7487 obs. of  24 variables:
-
-sp.data05<- df05 %>% 
-  select("su", "specCode", "count4m2", "plot2", "Transdepth", "rip", "fence")%>%
+df05 <- data %>%
+  filter(TST==0.5 & nat=="native" & longevity=="perennial" )%>% 
+  select("su", "specCode", "count4m2", "plot2", "Transdepth", "rip", "comb3")%>%
   na.omit()#su = sampling unit
-str(sp.data05)#7487 obs.
 
 #Change sp data to wide format to compute:
-veg.wide05<-spread(sp.data05,key = specCode, value = count4m2, fill = 0)
+veg.wide05<-spread(df05,key = specCode, value = count4m2, fill = 0)
 dim(veg.wide05)#665 124
 
 #Compute Diversity indices:
@@ -26,11 +24,20 @@ veg.wide05$DIVsimpson<-diversity(veg.wide05[,6:124], index= "simpson")
 veg.wide05$Density<-rowSums(veg.wide05[,6:124])
 veg.wide05$Richness<-specnumber(veg.wide05[,6:124])
 
+#Run Correlation Test:
 summary(cor(veg.wide05$DIVshannon,veg.wide05$Density))
 cor05<-cor.test(veg.wide05$DIVshannon,veg.wide05$Density)
 cor05$estimate # 0.7239812 
 cor05$p.value # P< 0.001
 cor05$statistic # t = 27.02393 
+
+#Produce Fig Richness~Density for reviewer:
+ggplot(veg.wide05, aes(Density,Richness, color = comb3)) + 
+  geom_point()+
+  ggtitle("Relationship between density and richness (Spring 2012)")+
+  labs(x = "Native Density",y="Native Richness",colour="Treatments:") +
+  theme_bw(base_size = 12)
+
 
 #Pearson's Correalation Test for Spring 2013=========
 #Subset native, perennials species data for TST=1.5 (Spring 2013):
