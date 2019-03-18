@@ -3,12 +3,12 @@ library(tidyverse)
 library(vegan)
 library(Rmisc)
 data<- read.csv("TopsoilEmergenceData.csv")#our density data
-str(data)#38247 obs. of  25 variables:
+dim(data)#38247 obs. of  24 variables:
 
 # Run Test on Spring 2012 emergence=========
 #Subset native plant species data for TST=0.5 (Spring 2012):
 df05 <- data %>% filter(TST==0.5 & nat=="native" ) %>% 
-  select("su", "specCode", "count4m2", "plot2", "Transdepth", "rip", "fence")%>%
+  select("su", "specCode", "count4m2", "plot2", "Transdepth", "rip", "fence") %>%
   na.omit()#su = sampling unit
 
 #Change sp data to wide format to compute richness:
@@ -23,8 +23,6 @@ veg.wide05$Richness<-specnumber(veg.wide05[,6:155])
 
 #Test for Spring 2013=========
 #Subset native, perennials species data for TST=1.5 (Spring 2013):
-data<- read.csv("TopsoilEmergenceData.csv")#reloading our raw density data
-
 df1.5 <- data %>% filter(TST==1.5 & nat=="native") %>% 
   select("su", "specCode", "count4m2", "plot2", "Transdepth", "rip", "fence")%>%
   na.omit()#su = sampling unit
@@ -74,7 +72,7 @@ EmData<-rbind(d1,d2,d3,d4,d5,d6)#merging year two and one
 EmData
 EmData$Scale <- "Site" #to reduce facetting to one level only on x-axis.
 
-#Richness ggplot for all years emergence richness:=====
+#Richness Figure, all years:=====
 pd <- position_dodge(.5)
 Fig_Richness <- 
   ggplot(EmData, aes(x=Site.Treatment, y=Richness,shape=Filter, color=season)) +
@@ -94,25 +92,42 @@ Fig_Richness <-
 Fig_Richness
 #ggsave(Fig_Richness, filename = "Fig1_SiteScale_emergenceRichness.jpg", width = 180, height = 120, units = "mm")
 
-#Model:===========
+#Two Models (Spring 2012 and 2013):===========
 library(lme4)
 library(lmerTest)
 veg.wide05 $ su <- as.character(veg.wide05 $ su)
+veg.wide05$rip <- factor( veg.wide05$rip, levels = c("unripped","ripped"))#changing levels to show Coef-s in relation to ripped effect
+
 veg.wide05.site<-veg.wide05 %>%
     separate(col = "su",into=c("site","cluster","plot"), sep="\\.", remove = F) %>%
   filter(plot2 == "smoke" | plot2 == "heat" | plot2 == "herbicide" | plot2== "control")
 
-
+#Spring 2012 Model:
 glmer.spr12<-glmer(Richness ~ rip+fence+Transdepth+rip*fence+fence*Transdepth+
                      rip*Transdepth + plot2 + rip*plot2 +Transdepth*plot2+
                      (1|site/cluster),family = poisson(link="log"),
                    data = veg.wide05.site)
-summary(glmer.spr12)
+
+#Spring 2013 Model:
+veg.wide1.5 $ su <- as.character(veg.wide1.5 $ su)
+veg.wide1.5$rip <- factor( veg.wide1.5$rip, levels = c("unripped","ripped"))#changing levels to show Coef-s in relation to ripped effect
+
+veg.wide1.5.site<-veg.wide1.5 %>%
+  separate(col = "su",into=c("site","cluster","plot"), sep="\\.", remove = F) %>%
+  filter(plot2 == "smoke" | plot2 == "heat" | plot2 == "herbicide" | plot2== "control")
+
+glmer.spr13<-glmer(Richness ~ rip+fence+Transdepth+rip*fence+fence*Transdepth+
+                     rip*Transdepth + plot2 + rip*plot2 +Transdepth*plot2+
+                     (1|site/cluster),family = poisson(link="log"),
+                   data = veg.wide1.5.site)
 
 #Create Summary Table of that model:
 library("sjPlot")
 library("TMB")
-tab_model (glmer.spr12)
-install.packages("installr")
-library(installr)
-updateR()
+tab_model (glmer.spr12,glmer.spr13,
+           show.intercept = F, transform = NULL,
+           auto.label = FALSE, show.ci = FALSE,
+           title = "Richness as predictor (Two Models)")
+
+#Resources: https://strengejacke.github.io/sjPlot/articles/tab_model_estimates.html
+#http://127.0.0.1:22024/library/sjPlot/doc/tab_mixed.R
