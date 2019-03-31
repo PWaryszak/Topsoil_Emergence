@@ -97,6 +97,7 @@ tab_model (glmer.spr12_SW,glmer.spr13_SW,
            title = "Shannon-Wiener Diversity Index as Response Variable (Two Models for Spring 2012 and 2013)")
 
 
+=======
 #Richness SummarySE for spring2012 emergence:=====
 veg.wide05$season <- "Spring 2012"
 
