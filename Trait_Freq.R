@@ -11,7 +11,7 @@ str(BigDF2)#data.frame':  787500 obs. of  39 variables,791058 obs. of  38 variab
 levels(BigDF2$season)#"Autumn2013" "Autumn2014" "remnant"    "Spring2012" "Spring2013"
 
 BigDF2<- BigDF2[!BigDF2$season=="remnant",] #remove remnant data
-BigDF3 <- BigDF2 [ BigDF2$count > 0, ] #Remove zero values rows
+BigDF3 <- BigDF2 [ BigDF2$count > 0 , ] #Remove zero values rows, 
 BigDF3 <- drop.levels(BigDF3)
 #Work on 2-years plots.
 #In 2013 we added few extra plots to keep balanced design (omitted here).
