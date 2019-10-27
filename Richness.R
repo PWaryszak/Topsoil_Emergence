@@ -130,9 +130,21 @@ d6$Filter <- "BIOTIC"
 colnames(d6)[1]<-"Site.Treatment"
 
 EmData<-rbind(d1,d2,d3,d4,d5,d6)#merging year two and one
-EmData
 EmData$Scale <- "Site" #to reduce facetting to one level only on x-axis.
-
+EmData
+#Site.Treatment      season   N Richness       sd        se        ci    Filter
+#1            deep Spring 2012 337 17.05045 7.427856 0.4046211 0.7959097 DISPERSAL
+#2         shallow Spring 2012 336 13.43750 7.100281 0.3873521 0.7619489 DISPERSAL
+#3        unripped Spring 2012 336 19.80655 7.068624 0.3856251 0.7585517   ABIOTIC
+#4          ripped Spring 2012 337 10.70030 4.542370 0.2474387 0.4867241   ABIOTIC
+#5          fenced Spring 2012 481 15.52599 7.686016 0.3504522 0.6886099    BIOTIC
+#6            open Spring 2012 192 14.54688 6.915942 0.4991151 0.9844856    BIOTIC
+#7            deep Spring 2013 431 12.87471 6.098272 0.2937434 0.5773516 DISPERSAL
+#8         shallow Spring 2013 417 11.89928 6.378255 0.3123445 0.6139702 DISPERSAL
+#9        unripped Spring 2013 436 12.69725 6.415505 0.3072470 0.6038732   ABIOTIC
+#10         ripped Spring 2013 412 12.07524 6.067477 0.2989231 0.5876089   ABIOTIC
+#11         fenced Spring 2013 561 12.34225 6.316685 0.2666907 0.5238363    BIOTIC
+#12           open Spring 2013 287 12.49826 6.135917 0.3621917 0.7128995    BIOTIC
 #Richness Figure, all years:=====
 pd <- position_dodge(.5)
 Fig_Richness <- 
