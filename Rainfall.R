@@ -175,3 +175,39 @@ Av
 23 2013   Nov        13.8
 24 2013   Dec         3.7
 
+#Rain from Autumn 2012 to Autumn 2013:======
+#First Autumn starts March 2012 and socond autumn ends May 2013:
+
+rainAut01<-filter(rain.long, rain.long$Year==2012 & rain.long$Month != "Jan" &
+                    rain.long$Month != "Feb")
+
+
+rainAut02<-filter(rain.long, rain.long$Year==2013 & rain.long$Month != "Jun" &
+                    rain.long$Month != "Jul" &
+                    rain.long$Month != "Aug" &
+                    rain.long$Month != "Sep" &
+                    rain.long$Month != "Oct" &
+                    rain.long$Month != "Nov" &
+                    rain.long$Month != "Dec")
+
+rainAut <- rbind(rainAut01, rainAut02)
+rainAut$CumSum<-cumsum(rainAut$Rainfall/2) #/2 because two weather stations (Site)
+
+#Rain from Autumn 2013 to Autumn 2014:======
+#First Autumn starts March 2012 and socond autumn ends May 2013:
+
+rainAut01<-filter(rain.long, rain.long$Year==2013 & rain.long$Month != "Jan" &
+                    rain.long$Month != "Feb")
+
+
+rainAut02<-filter(rain.long, rain.long$Year==2014 & rain.long$Month != "Jun" &
+                    rain.long$Month != "Jul" &
+                    rain.long$Month != "Aug" &
+                    rain.long$Month != "Sep" &
+                    rain.long$Month != "Oct" &
+                    rain.long$Month != "Nov" &
+                    rain.long$Month != "Dec")
+
+rainAut <- rbind(rainAut01, rainAut02)
+rainAut$CumSum<-cumsum(rainAut$Rainfall/2) #/2 because two weather stations (Site)
+
