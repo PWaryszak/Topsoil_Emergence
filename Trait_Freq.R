@@ -1,22 +1,19 @@
 #Look at the frequency of seedlings/Traits in 3 treatments (Transdepth, Rip, Fence):
 #WEB: https://github.com/dcomtois/summarytools
-library(tidyr)
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 library(gdata)
 library(lme4)
 library(lmerTest)
 library(officer)
 library(flextable)
-library(broom)#Re-Load  data to be sure all works well [Topsoil Emergence DATA:only spr12 & spr13 seasons included:
 
 #Across all seasons after topsoil transfer:
 BigDF2<-read.csv("big2trait.csv")#the entire data frame (site,plot,trait)
 dim(BigDF2)#791058 obs. of  38 variables, including REMNANT DATA
 levels(BigDF2$season)#"Autumn2013" "Autumn2014" "remnant"    "Spring2012" "Spring2013"
 BigDF2<- BigDF2[!BigDF2$season=="remnant",] #remove remnant data
-BigDF3 <- BigDF2 [ BigDF2$count > 0 , ] #Remove zero values rows, 
-BigDF3 <- drop.levels(BigDF3)
+BigDF3 <- BigDF2 [ BigDF2$count > 0 , ] #Remove zero values rows, you can't divide by zero
+#BigDF3 <- drop.levels(BigDF3)
 
 #Work on 2-years plots.
 #In 2013 we added few extra plots to keep balanced design (omitted here).
@@ -25,14 +22,15 @@ BigDF3 <- BigDF2 [ BigDF2$count > 0 & BigDF2$plot2 == "CTRL", ] #Remove zero val
 #Freq of Spr12 vs Aut14 (start and end season):
 #NATIVE AND PERENNIAL ONLY!
 BigDF4 <- BigDF3 [ BigDF3$season=="Spring2012" | BigDF3$season=="Autumn2014", ] #Remove zero values from count of species
-BigDF4 <- drop.levels(BigDF4)#10109    38
+#BigDF4 <- drop.levels(BigDF4)#10109    38
 dim(BigDF4)
 #Compute Perry's PFT as per Fowler's paper--------
 #NATIVES vs ALIENS (%):==========
-nat_Percent <- group_by(BigDF4, su,  nat, .drop = F) %>% #CHOOSE YOUR PFT HERE!
+nat_Percent <- BigDF4 %>%
+  group_by(su,  nat, .drop = F) %>% #CHOOSE YOUR PFT HERE!
   summarise(Spr2012 = sum(count[season=="Spring2012"]),
             Aut2014 = sum(count[season == "Autumn2014"])) %>%
-   mutate (Transdepth =ifelse(grepl('D',su), 'deep', 'shallow')) %>%
+   mutate (Transdepth =ifelse(grepl('D', su), 'deep', 'shallow')) %>%
    mutate (rip =ifelse(grepl('R',su), 'ripped', 'unripped')) %>%
    mutate (fence =ifelse(grepl('F',su), 'fenced', 'open')) %>%
   gather(season,  count1m2, Spr2012:Aut2014) %>% #Fill seasons with count1m2
@@ -45,6 +43,16 @@ ggplot (nat_Percent, aes(x = season, y = Inv_Perc)) +
            geom_violin(adjust = 1L, scale = "area", fill = "#35b779") +
            theme_bw() +  facet_grid(.~fence)
 
+
+#Compute how many weeds were annual (count of per 1m2?
+nat_Percent2 <- BigDF4 %>%
+  select(count, nat, longevity ) %>%
+  filter(nat=="invasive")%>%
+  summarise(annuals = sum(count[longevity=="annual"], na.rm = T),
+            pers = sum(count[longevity=="perennial"], na.rm = T),
+            RA = round((annuals/(annuals+pers)*100),0))
+nat_Percent2
+
 #Native mean +SD percent=
 nat_Perc_mean <- gather(nat_Percent,TRF, Treatment, Transdepth:fence) %>%
   group_by(season,  Treatment) %>%
@@ -54,8 +62,51 @@ nat_Perc_mean <- gather(nat_Percent,TRF, Treatment, Transdepth:fence) %>%
              se_nat = sd_nat/sqrt(n_nat))%>%
   select(season, Treatment, mean_nat, se_nat)
 
+ggplot(nat_Perc_mean, aes(Treatment, mean_nat)) +
+  geom_point() +facet_grid(.~season)
+
+#Overall nat percent per season:
+nat_Perc_mean2 <- gather(nat_Percent,TRF, Treatment, Transdepth:fence) %>%
+  group_by(season) %>%
+  summarize( mean_nat = mean (Nat_Perc, na.rm=T),
+             n_nat = length(Nat_Perc),
+             sd_nat = sd(Nat_Perc, na.rm=T),
+             se_nat = sd_nat/sqrt(n_nat))%>%
+  select(season, mean_nat, se_nat)
+
+#Heavily infested sites two years after topsoil
+inv_Perc_mean <- gather(nat_Percent,TRF, Treatment, Transdepth:fence) %>%
+  group_by(season) %>%
+  summarize( mean_inv = mean (Inv_Perc, na.rm=T),
+             n_inv = length(Inv_Perc),
+             sd_inv = sd(Inv_Perc, na.rm=T),
+             se_inv = sd_inv/sqrt(n_inv))%>%
+  select(season,  mean_inv, se_inv)
+#season  mean_inv se_inv
+#1 Aut2014     43.7  0.923
+#2 Spr2012     77.0  0.319
+
+
+#Freq of Ehrharta in Aut2014======
+nat_Percent_ehr <- BigDF4 %>%
+  filter(specCode=="ehrhcaly") %>%
+  group_by(su,  nat, .drop = F) %>% #CHOOSE YOUR PFT HERE!
+  summarise(Aut2014 = sum(count[season == "Autumn2014"])) %>%
+  mutate (Transdepth =ifelse(grepl('D', su), 'deep', 'shallow')) %>%
+  mutate (rip =ifelse(grepl('R',su), 'ripped', 'unripped')) %>%
+  mutate (fence =ifelse(grepl('F',su), 'fenced', 'open')) %>%
+  gather(season,  count1m2, Aut2014) %>% #Fill seasons with count1m2
+  spread (nat,  count1m2) %>% #move native & aliens to cols to compute % 
+  mutate(total = invasive + native,
+         Nat_Perc = native/ total *100, #Percent of natives per plot
+         Inv_Perc = invasive/total *100) %>%#Percent of invasives per plot
+mutate(EhrIn = ifelse(invasive>0,1,0))
+
+
+sum(nat_Percent_ehr$EhrIn)/length(nat_Percent_ehr$EhrIn)*100 #18.30664 %
+
 #Annual vs Perennial PFT:=============
-longevity_Percent <- filter (BigDF4, plot2=="CTRL" & longevity != "NA") %>% #only sie -scale treatments
+longevity_Percent <- filter (BigDF4, plot2=="CTRL" & longevity != "NA" &nat == "native") %>% #only sie -scale treatments
   group_by(su,longevity, .drop = F) %>% #CHOOSE YOUR PFT HERE!
   summarise(Spr2012 = sum(count[season=="Spring2012"]),
             Aut2014 = sum(count[season == "Autumn2014"])) %>%
@@ -78,6 +129,8 @@ longevity_means <- gather(longevity_Percent,longevity, Percent,annual_Perc:peren
   group_by(longevity, season, Level) %>%
   summarise(Mean_Percent = mean(Percent, na.rm=T),
             SD_Percent = sd (Percent, na.rm=T))
+
+#Native longevity % Per season per treatment:
 lon_Perc_mean <- gather(longevity_Percent,TRF, Treatment, Transdepth:fence) %>%
   group_by(season,  Treatment) %>%
   summarize( mean_lon = mean (annual_Perc, na.rm=T),
@@ -85,6 +138,15 @@ lon_Perc_mean <- gather(longevity_Percent,TRF, Treatment, Transdepth:fence) %>%
              n_lon = length(annual_Perc),
              se_lon = sd_lon/sqrt(n_lon)) %>%
   select(season, Treatment, mean_lon, se_lon)
+
+#Native longevity % Per season:
+lon_Perc_mean2 <- gather(longevity_Percent,TRF, Treatment, Transdepth:fence) %>%
+  group_by(season) %>%
+  summarize( mean_lon = mean (annual_Perc, na.rm=T),
+             sd_lon = sd(annual_Perc, na.rm=T),
+             n_lon = length(annual_Perc),
+             se_lon = sd_lon/sqrt(n_lon)) %>%
+  select(season, mean_lon, se_lon)
 
 pd <- position_dodge(.5)
 ggplot (longevity_means, aes(x = season, y = Mean_Percent, shape= season)) +
@@ -94,7 +156,7 @@ ggplot (longevity_means, aes(x = season, y = Mean_Percent, shape= season)) +
 
 #RESPROUTERS vs SEEDERS:==============
 resprouter_Perc <- filter (BigDF4, plot2=="CTRL" & resprouter != "NA") %>% #only sie -scale treatments
-  group_by(su,resprouter, .drop = F) %>% #CHOOSE YOUR PFT HERE!
+  group_by(su, resprouter, .drop = F) %>% #CHOOSE YOUR PFT HERE!
   summarise(Spr2012 = sum(count[season=="Spring2012"]),
             Aut2014 = sum(count[season == "Autumn2014"])) %>%
   mutate (Transdepth =ifelse(grepl('D',su), 'deep', 'shallow')) %>%
@@ -118,6 +180,94 @@ resprouter_Perc_mean <- gather(resprouter_Perc, TRF,Treatment,Transdepth:fence) 
              sd_resprouter = sd(Resp_Perc, na.rm=T),
              se_resprouter = sd_resprouter/sqrt(n_resprouter)) %>%
   select(season, Treatment, mean_resprouter, se_resprouter)
+
+
+#Reprouters within perennial group:
+resprouter_Perc2 <- filter (BigDF4, plot2=="CTRL" & resprouter != "NA") %>% #only sie -scale treatments
+  filter(longevity =="perennial")%>%
+  group_by(su,resprouter, .drop = F) %>% #CHOOSE YOUR PFT HERE!
+  summarise(Spr2012 = sum(count[season=="Spring2012"]),
+            Aut2014 = sum(count[season == "Autumn2014"])) %>%
+  mutate (Transdepth =ifelse(grepl('D',su), 'deep', 'shallow')) %>%
+  mutate (rip =ifelse(grepl('R',su), 'ripped', 'unripped')) %>%
+  mutate (fence =ifelse(grepl('F',su), 'fenced', 'open'))%>%
+  gather(season,  count1m2, Spr2012:Aut2014)%>%
+  spread (resprouter,  count1m2) %>%
+  mutate(total = no + yes, #levels of variable "nat"
+         Resp_Perc = yes/ total *100,
+         NoResp_Perc = no/total *100)
+
+resprouter_Perc_mean2 <- gather(resprouter_Perc, TRF,Treatment,Transdepth:fence) %>%
+  group_by(season) %>%
+  summarize( mean_resprouter = mean (Resp_Perc, na.rm=T), #use 100-Resp_Perc to get percent of seeders
+             n_resprouter = length(Resp_Perc),
+             sd_resprouter = sd(Resp_Perc, na.rm=T),
+             se_resprouter = sd_resprouter/sqrt(n_resprouter)) %>%
+  select(season, mean_resprouter, se_resprouter)
+
+resprouter_Perc3 <- filter (BigDF4, plot2=="CTRL" & resprouter != "NA") %>% #only sie -scale treatments
+  filter(nat =="invasive" & longevity =="annual")%>%
+  group_by(specCode,resprouter, .drop = F) %>% #
+  summarise(Spr2012 = sum(count[season=="Spring2012"]),
+            Aut2014 = sum(count[season == "Autumn2014"])) %>%
+  arrange(desc(Spr2012))
+
+#Mean Counts of Weeds:
+resprouter_Perc4 <- filter (BigDF4, plot2=="CTRL" & resprouter != "NA") %>% #only sie -scale treatments
+  filter(nat =="invasive" & longevity =="annual")%>%
+  group_by(specCode,resprouter, .drop = F) %>% #
+  summarise(Spr2012 = mean(count[season=="Spring2012"]),
+            Aut2014 = mean(count[season == "Autumn2014"])) %>%
+  arrange(desc(Spr2012))
+
+
+#Resprouters within remnant site:
+r <-read.csv("big2trait.csv") %>%
+  filter(season == "remnant")
+
+remn <- r %>% #only sie -scale treatments
+  filter(nat =="native")%>%
+  select(su,resprouter,count)%>%
+  group_by(su,resprouter)%>%
+  summarise(sum_count = sum(count, na.rm = T)) %>%
+  spread (resprouter, value = sum_count, ) %>%
+  mutate(no1  =  ifelse(is.na(no),0,no), #replace NA with zero
+         yes1 = ifelse(is.na(yes),0,yes)) %>% #replace NA with zero
+  
+  mutate(total = no1 + yes1, #levels of variable "nat"
+         Resp_Perc = yes1/ total *100,
+         NoResp_Perc = no1/total *100) 
+remn
+mean(remn$Resp_Perc) #90.0499
+
+#Native within remnant banksia:
+#Resprouters within remnant site:
+r <-read.csv("big2trait.csv") %>%
+  filter(season == "remnant")
+
+remn_nat <- r %>% #only sie -scale treatments
+  select(su,nat,count)%>%
+  group_by(su,nat)%>%
+  summarise(sum_count = sum(count, na.rm = T)) %>%
+  spread (nat, value = sum_count, ) %>%
+  mutate(no1  =  ifelse(is.na(invasive),0,invasive), #replace NA with zero
+         yes1 = ifelse(is.na(native),0,native)) %>% #replace NA with zero
+  
+  mutate(total = no1 + yes1, #levels of variable "nat"
+         Resp_Perc = yes1/ total *100,
+         NoResp_Perc = no1/total *100) 
+remn_nat
+mean(remn_nat$Resp_Perc) #90.59174
+
+
+
+resprouter_Perc_mean2 <- gather(resprouter_Perc, TRF,Treatment,Transdepth:fence) %>%
+  group_by(season) %>%
+  summarize( mean_resprouter = mean (Resp_Perc, na.rm=T), #use 100-Resp_Perc to get percent of seeders
+             n_resprouter = length(Resp_Perc),
+             sd_resprouter = sd(Resp_Perc, na.rm=T),
+             se_resprouter = sd_resprouter/sqrt(n_resprouter)) %>%
+  select(season, mean_resprouter, se_resprouter)
 
 #WOODY vs NON_WOODY:=============
 growCategory_Percent <- filter (BigDF4, plot2=="CTRL" & growCategory != "NA") %>% #only sie -scale treatments
@@ -293,3 +443,47 @@ natnative                  -2.741533   0.111132 -24.669  < 2e-16 ***
   treat_shallow:natnative  -0.255774   0.012038 -21.248  < 2e-16 ***
   treat_unripped:natnative -0.014804   0.010888  -1.360   0.1740 
 
+#Treatments and SeedResponse:======
+library(tidyverse)
+library(gdata)
+library(lme4)
+library(lmerTest)
+
+BigDF2<-read.csv("big2trait.csv")#the entire data frame (site,plot,trait)
+dim(BigDF2)#790625     38 variables with REMNANT DATA
+levels(BigDF2$season)#"Autumn2013" "Autumn2014" "remnant"    "Spring2012" "Spring2013"
+
+BigDF2<- BigDF2[!BigDF2$season=="remnant",] #remove remnant data
+BigDF3 <- BigDF2 [ BigDF2$count > 0 & BigDF2$plot2 == "CTRL", ] #Remove zero values rows,keep CTRL only (site-level treatments)
+BigDF3 <- drop.levels(BigDF3)
+BigDF4 <- BigDF3 [ BigDF3$season=="Spring2012" | BigDF3$season=="Autumn2014", ] #Remove zero values from count of species
+BigDF4 <- drop.levels(BigDF4)
+
+
+spr12 <- BigDF4[ BigDF4$season== "Spring2012" & BigDF4$nat== "native",]##NATIVE PERENNIAL ONLY!
+
+spr12$Sum4m2 <- spr12$count * 4
+
+spr12.glmer <- glmer(Sum4m2 ~ fence*seedResponse+(1|site) +(1|cluster) +(1|specCode),
+                     family = poisson(link="log"), data = spr12)
+summary(spr12.glmer)
+
+
+BigDF2<-read.csv("big2trait.csv")#the entire data frame (site,plot,trait)
+dim(BigDF2)#790625     38 variables with REMNANT DATA
+levels(BigDF2$season)#"Autumn2013" "Autumn2014" "remnant"    "Spring2012" "Spring2013"
+
+BigDF2<- BigDF2[!BigDF2$season=="remnant",] #remove remnant data
+BigDF3 <- BigDF2 [ BigDF2$count > 0 & BigDF2$plot2 == "HEAT", ] #Remove zero values rows,keep CTRL only (site-level treatments)
+BigDF3 <- drop.levels(BigDF3)
+BigDF4 <- BigDF3 [ BigDF3$season=="Spring2012" | BigDF3$season=="Autumn2014", ] #Remove zero values from count of species
+BigDF4 <- drop.levels(BigDF4)
+
+
+spr13 <- BigDF4[ BigDF4$season== "Spring2012" & BigDF4$nat== "native",]##NATIVE PERENNIAL ONLY!
+
+spr13$Sum4m2 <- spr12$count * 4
+
+spr13.glmer <- glmer(Sum4m2 ~ fence * seedResponse+(1|site) +(1|cluster) ,
+                     family = poisson(link="log"), data = spr13))
+summary(spr13.glmer)
